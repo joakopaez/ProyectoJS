@@ -243,55 +243,48 @@ new Game ("HADES", 2020, "ROGUELIKE", "SUPERGIANT GAMES"),
         icon: "success"
       });
     } else {
-      searchRAWG({ name: searchName, year: searchYear, genre: searchGenre, development: searchDevelopment });
-    }
-  }
-  
-  function searchRAWG(params) {
-    let API_KEY = "4f1982e4e0ed48ce87d685cfa5c2443f"; 
-    let query = `https://api.rawg.io/api/games?key=${API_KEY}`;
-  
-    if (params.name) {
-      query += `&search=${encodeURIComponent(params.name)}`;
-    }
-    if (params.year) {
-      query += `&dates=${params.year}-01-01,${params.year}-12-31`;
-    }
-    if (params.genre) {
-      query += `&genres=${encodeURIComponent(params.genre)}`;
-    }
-    if (params.development) {
-      query += `&developers=${encodeURIComponent(params.development)}`;
-    }
-  
-    fetch(query)
-      .then(response => response.json())
-      .then(data => {
-        if (data.count && data.count > 0) {
-          const gameNames = data.results.map(game => game.name).join(", ");
-          Swal.fire({
-            title: "Resultados en RAWG API:",
-            text: gameNames,
-            icon: "success"
-          });
-        } else {
-          Swal.fire({
-            icon: "error",
-            title: "Juego no encontrado",
-            text: "No se encontró ningún juego en RAWG API con esos parámetros."
-          });
-        }
-      })
-      .catch(error => {
-        console.error("Error en RAWG API:", error);
-        Swal.fire({
-          icon: "error",
-          title: "Error en RAWG API",
-          text: "Ocurrió un error al buscar en RAWG API."
-        });
+      Swal.fire({
+        icon: "error",
+        title: "Juego no encontrado",
+        text: "No se encontró ningún juego con esos parámetros."
       });
-  }
+  }}
   
+  let container = document.getElementById("cards-container");
+
+  
+  let API_KEY = "4f1982e4e0ed48ce87d685cfa5c2443f"; 
+  let url = `https://api.rawg.io/api/games?key=${API_KEY}&dates=2024-01-01,2025-01-30`;
+
+  async function getData() {
+    try {
+      let response = await fetch(url);
+      let data = await response.json();
+      console.log(data.results)
+      return data.results; 
+    } catch (error) {
+      console.error('Error al obtener datos:', error);
+    }
+  }
+  async function commingGames() {
+    let resultados = await getData();
+    let container = document.getElementById('cards-container');
+  
+    resultados.forEach(item => {
+      let card = document.createElement('div');
+      card.classList.add('card');
+  
+      card.innerHTML = `
+        <img src="${item.background_image}" alt="${item.name}">
+        <h2>${item.name}</h2>
+        <p>${item.released}</p>
+      `;
+      container.appendChild(card);
+    });
+  }
+
+  commingGames();
+
   document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("addNewGame").addEventListener("click", addGame);
     document.getElementById("searchNewGame").addEventListener("click", searchGames);
